@@ -168,5 +168,5 @@ resource "aws_vpc_security_group_ingress_rule" "istio_sgr" {
   from_port   = each.value["from_port"]
   to_port     = each.value["to_port"]
   description = each.value["description"]
-  referenced_security_group_id = module.eks.node_security_group_id
+  referenced_security_group_id = module.eks.cluster_security_group_id
 }
