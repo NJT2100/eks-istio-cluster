@@ -48,6 +48,12 @@ variable "cluster_version" {
   default     = "1.30"
 }
 
+variable "eks_role_name" {
+  description = "EKS Role"
+  type        = string
+  default     = "EKSDevelopmentRole"
+}
+
 # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
 variable "eks_managed_node_config" {
   type  = list(object({

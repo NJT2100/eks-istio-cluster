@@ -46,12 +46,8 @@ module "eks" {
   # install eks managed addons
   # more details are here - https://docs.aws.amazon.com/eks/latest/userguide/
   cluster_addons = {
-    coredns                = {
-      most_recent = true
-    }
-    eks-pod-identity-agent = {
-      most_recent = true
-    }
+    coredns                = {}
+    eks-pod-identity-agent = {}
     kube-proxy             = {
       most_recent = true
     }
@@ -119,7 +115,7 @@ module "vpc_cni_irsa" {
 ##############################
 
 resource "aws_iam_role" "eks_iam_role" {
-  name = "EKSDevelopmentRole"
+  name = var.eks_role_name
 
   assume_role_policy = <<POLICY
   {
@@ -151,11 +147,11 @@ resource "aws_iam_role_policy_attachment" "eks_iam_role_attach" {
 resource "aws_vpc_security_group_ingress_rule" "istio_sgr" {
   for_each = var.istio_security_group_rules
   
-  security_group_id = module.eks.cluster_primary_security_group_id
+  security_group_id = module.eks.cluster_security_group_id
 
   ip_protocol = each.value["ip_protocol"]
   from_port   = each.value["from_port"]
-  to_port     =  each.value["to_port"]
+  to_port     = each.value["to_port"]
   description = each.value["description"]
-  referenced_security_group_id = module.eks.cluster_primary_security_group_id
+  referenced_security_group_id = module.eks.cluster_security_group_id
 }
