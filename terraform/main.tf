@@ -71,7 +71,9 @@ module "eks" {
   # subnets where the eks cluster needs to be created
   control_plane_subnet_ids = local.private_subnet_ids
 
-  eks_managed_node_group_defaults = var.eks_managed_node_config
+  # eks_managed_node_group_defaults = var.eks_managed_node_config
+
+  eks_managed_node_groups = var.eks_managed_node_config
 
   access_entries = {
     # One access entry with a policy associated
