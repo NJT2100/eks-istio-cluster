@@ -13,12 +13,12 @@ locals {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "eks-vpc"
-  cidr = "10.0.0.0/16"
+  name = var.vpc_name
+  cidr = var.vpc_cidr_block
 
   azs             = data.aws_availability_zones.available.names
-  private_subnets = ["10.0.0.0/22", "10.0.4.0/22", "10.0.8.0/22"]
-  public_subnets  = ["10.0.100.0/22", "10.0.104.0/22", "10.0.108.0/22"]
+  private_subnets = var.private_subnet_cidr_blocks
+  public_subnets  = var.public_subnet_cidr_blocks
 
   enable_nat_gateway = true
   single_nat_gateway = true
@@ -37,8 +37,8 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
-  cluster_name    = "development"
-  cluster_version = "1.30"
+  cluster_name    = var.cluster_name
+  cluster_version = var.cluster_version
 
   # to enable public and private access for eks cluster endpoint
   cluster_endpoint_public_access = true
@@ -71,26 +71,11 @@ module "eks" {
   
   vpc_id     = local.vpc_id
   subnet_ids = local.subnet_ids
+  
   # subnets where the eks cluster needs to be created
   control_plane_subnet_ids = local.private_subnet_ids
 
-  # EKS Managed Node Groups
-  eks_managed_node_group_defaults = {
-    instance_types = ["t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large"]
-  }
-
-  eks_managed_node_groups = {
-    default = {
-      # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
-      ami_type       = "AL2023_x86_64_STANDARD"
-      instance_types = ["t2.medium"]
-      iam_role_attach_cni_policy = true
-
-      min_size       = 3
-      max_size       = 3
-      desired_size   = 3
-    }
-  }
+  eks_managed_node_group_defaults = var.eks_managed_node_config
 
   access_entries = {
     # One access entry with a policy associated
@@ -157,4 +142,20 @@ resource "aws_iam_role" "eks_iam_role" {
 resource "aws_iam_role_policy_attachment" "eks_iam_role_attach" {
   role       = aws_iam_role.eks_iam_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+}
+
+###############################
+#  ATTACH SG RULES FOR ISTIO  #
+###############################
+
+resource "aws_vpc_security_group_ingress_rule" "istio_sgr" {
+  for_each = var.istio_security_group_rules
+  
+  security_group_id = module.eks.cluster_primary_security_group_id
+
+  ip_protocol = each.value["ip_protocol"]
+  from_port   = each.value["from_port"]
+  to_port     =  each.value["to_port"]
+  description = each.value["description"]
+  referenced_security_group_id = module.eks.cluster_primary_security_group_id
 }
