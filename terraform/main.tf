@@ -162,11 +162,11 @@ resource "aws_iam_role_policy_attachment" "eks_iam_role_attach" {
 resource "aws_vpc_security_group_ingress_rule" "istio_sgr" {
   for_each = var.istio_security_group_rules
   
-  security_group_id = module.eks.cluster_security_group_id
+  security_group_id = module.eks.node_security_group_id
 
   ip_protocol = each.value["ip_protocol"]
   from_port   = each.value["from_port"]
   to_port     = each.value["to_port"]
   description = each.value["description"]
-  referenced_security_group_id = module.eks.cluster_security_group_id
+  referenced_security_group_id = module.node_security_group_id
 }
