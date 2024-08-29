@@ -55,29 +55,29 @@ variable "eks_role_name" {
 }
 
 # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
-variable "eks_managed_node_config" {
-  type  = list(object({
-    ami_type       = string
-    instance_types = list(string)
+# variable "eks_managed_node_config" {
+#   type  = list(object({
+#     ami_type       = string
+#     instance_types = list(string)
 
-    min_size       = number
-    max_size       = number
-    desired_size   = number
+#     min_size       = number
+#     max_size       = number
+#     desired_size   = number
 
-    iam_role_attach_cni_policy = bool
-  }))
-  default = [ {
-    ami_type       = "AL2023_x86_64_STANDARD"
-    instance_types = ["t2.medium"]
+#     iam_role_attach_cni_policy = bool
+#   }))
+#   default = [ {
+#     ami_type       = "AL2023_x86_64_STANDARD"
+#     instance_types = ["t2.medium"]
 
-    min_size       = 3
-    max_size       = 3
-    desired_size   = 3
+#     min_size       = 3
+#     max_size       = 3
+#     desired_size   = 3
 
-    iam_role_attach_cni_policy = true
-  } ]
+#     iam_role_attach_cni_policy = true
+#   } ]
   
-}
+# }
 
 variable "istio_security_group_rules" {
   type = map(object({

@@ -8,6 +8,19 @@ locals {
   public_subnet_ids = module.vpc.public_subnets
   private_subnet_ids = module.vpc.private_subnets
   subnet_ids = concat(local.public_subnet_ids, local.private_subnet_ids)
+
+  eks_managed_node_group = {
+    dev = {
+      ami_type       = "AL2023_x86_64_STANDARD"
+      instance_types = ["t2.medium"]
+
+      min_size       = 3
+      max_size       = 3
+      desired_size   = 3
+
+      iam_role_attach_cni_policy = true
+    }
+  }
 }
 
 module "vpc" {
@@ -73,7 +86,7 @@ module "eks" {
 
   # eks_managed_node_group_defaults = var.eks_managed_node_config
 
-  eks_managed_node_groups = var.eks_managed_node_config
+  eks_managed_node_groups = local.eks_managed_node_group
 
   access_entries = {
     # One access entry with a policy associated
