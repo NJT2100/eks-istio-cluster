@@ -28,5 +28,9 @@ jobs:
       
       - name: Terraform Init
         id: init
-        run: terraform destroy -auto-approve
+        run: terraform init
+
+      - name: Terraform Destroy
+        id: destroy
+        run: terraform destroy -auto-approve 
   
